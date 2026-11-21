@@ -1,0 +1,15 @@
+{
+  "category": "General",
+  "changelog": "Initial release - scrobble and skip tracking to Bragi API",
+  "description": "Scrobble music plays and track skips directly to Bragi API",
+  "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "Bragi Scrobbler",
+  "overview": "Send music play events to Bragi",
+  "owner": "paul",
+  "targetAbi": "12.2.0.0",
+  "timestamp": "2026-02-12T10:00:00.0000000Z",
+  "version": "1.0.0.0",
+  "status": "Active",
+  "autoUpdate": false,
+  "assemblies": []
+}

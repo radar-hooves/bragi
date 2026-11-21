@@ -1,0 +1,6 @@
+{
+  "titles": ["Track 10", "Track 07", "Track 8", "Track 2", "Beyoncé", "Beyonce", "Sigur Rós", "sigur ros", "Track 007"],
+  "titlesSorted": ["Beyoncé", "Beyonce", "Sigur Rós", "sigur ros", "Track 2", "Track 07", "Track 007", "Track 8", "Track 10"],
+  "artists": ["The Black Keys", "Air", "A Tribe Called Quest", "Zappa, Frank", "Beyoncé", "beyonce"],
+  "artistsSorted": ["Air", "Beyoncé", "beyonce", "The Black Keys", "A Tribe Called Quest", "Zappa, Frank"]
+}

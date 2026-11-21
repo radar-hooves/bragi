@@ -1,0 +1,3 @@
+{
+  "allowedMcpServers": [{ "serverName": "core-memory-agent" }, { "serverName": "earworm" }, { "serverName": "foreman" }, { "serverName": "github" }, { "serverName": "jellyfin" }, { "serverName": "loki" }, { "serverName": "tempo" }]
+}

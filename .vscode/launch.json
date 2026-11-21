@@ -1,0 +1,75 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tauri › Dev",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "tauri",
+        "dev"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "presentation": {
+        "group": "1_tauri",
+        "order": 1
+      }
+    },
+    {
+      "name": "Tauri › Build Release",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "tauri",
+        "build"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "presentation": {
+        "group": "1_tauri",
+        "order": 2
+      }
+    },
+    {
+      "name": "Tauri › Debug Rust",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${workspaceFolder}/src-tauri/target/debug/bragi",
+      "args": [],
+      "cwd": "${workspaceFolder}/src-tauri",
+      "env": {
+        "RUST_BACKTRACE": "1"
+      },
+      "preLaunchTask": "Build Tauri Debug",
+      "sourceLanguages": [
+        "rust"
+      ],
+      "presentation": {
+        "group": "1_tauri",
+        "order": 3
+      }
+    },
+    {
+      "name": "Tauri › Attach to Running",
+      "type": "lldb",
+      "request": "attach",
+      "pid": "${command:pickProcess}",
+      "sourceLanguages": [
+        "rust"
+      ],
+      "presentation": {
+        "group": "1_tauri",
+        "order": 4
+      }
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+[package]
+name = "bragi"
+version = "2026.11.1"
+description = "The desktop player for your own Jellyfin or OpenSubsonic music server, browsable even offline"
+authors = ["poodle64"]
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "bragi_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["image-png", "tray-icon"] }
+tauri-plugin-opener = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-notification = "2"
+# Launch-on-login (autostart). Abstracts the per-OS mechanism (Linux XDG
+# .desktop, macOS LaunchAgent plist, Windows registry) behind one Rust API.
+tauri-plugin-autostart = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["full"] }
+tracing = "0.1"
+# The one telemetry call: stderr for the developer, allow-listed
+# OTLP/HTTP to your telemetry endpoint for what the audit target emits. Consumed from
+# the app-factory kit.
+telemetry = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.57" }
+# The Tauri 2 wiring for the crate above: init off the async runtime, the
+# Guard dropped on RunEvent::Exit, allow-listed command spans with no argument
+# capture, the Settings-pane commands, and the process sampler — one
+# `.plugin(...)` call in `lib.rs` in place of bragi's own former
+# `command_span.rs` and `commands/telemetry.rs`.
+tauri-plugin-telemetry = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.57" }
+# Centred macOS traffic lights (`traffic_lights::setup`) and `guard_tray`, which
+# keeps a missing appindicator library from killing the app at launch.
+desktop-shell = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.57" }
+# Names the client type `telemetry::http_client()` hands back, so the shared
+# traceparent-carrying client can be stored in bragi's own clients.
+reqwest-middleware = { version = "0.5", features = ["json", "query"] }
+# No `hickory-dns`: its in-process resolver never recovers after macOS sleep.
+reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "query", "rustls"] }
+url = "2"
+dirs = "7"
+
+# Audio playback (mpv handles playback and device enumeration via IPC)
+fastrand = "2"
+
+# Waveform visualisation: decode a track's audio to precompute peak
+# buckets for the seekable now-playing waveform. mpv plays audio in a
+# subprocess and exposes no PCM over its IPC, so peaks must be computed by
+# decoding the file/transcode ourselves. Opus is unsupported by symphonia, so
+# the streaming path always fetches a transcoded MP3 (see waveform.rs).
+symphonia = { version = "0.6", features = ["mp3", "flac", "aac", "isomp4", "vorbis", "ogg", "pcm", "wav", "alac"] }
+
+# Streaming audio
+bytes = "1"
+futures-util = "0.3"
+
+# Local proxy for secure credential injection
+axum = "0.8"
+
+# Local database
+rusqlite = { version = "0.42", features = ["bundled", "collation"] }
+
+# Accent folding for the shared music sort order (src-tauri/src/ordering.rs):
+# NFD-decompose then drop the combining marks, the standard idiom this crate
+# exists for.
+unicode-normalization = "0.1"
+
+# Date/time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID generation
+uuid = { version = "1", features = ["v4"] }
+
+# OpenSubsonic auth: the Subsonic protocol authenticates each request
+# with token = md5(password + salt). md5 is mandated by the protocol, not a
+# security choice of ours.
+md5 = "0.8"
+
+# kill(2) for the mpv orphan reaper (both platforms); PR_SET_PDEATHSIG (Linux)
+libc = "0.2"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-process = "2"
+tauri-plugin-updater = "2.14"
+
+# macOS-specific dependencies
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS media key integration (MPRemoteCommandCenter)
+objc2 = "0.6"
+objc2-foundation = "0.3"
+block2 = "0.6"
+# macOS audio device change notifications
+coreaudio-sys = "0.2"
+
+[dev-dependencies]
+# The audit tests capture what each event carries. `telemetry` owns the real
+# subscriber; this is a local one, installed only for the length of a test.
+tracing-subscriber = { version = "0.3", features = ["registry"] }
+
+# Debug info stays in the objects' side files, where a debugger reads it, rather
+# than in every linked test binary: each links the whole app library, and a
+# handful at once outruns a 6 GB CI runner. macOS already builds this way.
+[profile.dev]
+split-debuginfo = "unpacked"

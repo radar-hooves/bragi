@@ -1,0 +1,134 @@
+@import 'tailwindcss';
+@import '@poodle64/design-tokens/tokens.tw.css';
+@import '@poodle64/design-tokens/tokens.css';
+/* Required, not optional. Every component in @poodle64/ui is written against the
+   shadcn semantic colour names, and this stylesheet is what maps those names to
+   --ds-* tokens AND registers them with Tailwind. Without it, bg-card / bg-muted
+   / bg-accent / border-input compile to no rule at all — silently. It also ships
+   the `dark` custom variant, the data-open/data-closed variants, tw-animate-css
+   (where the overlay enter/exit keyframes live), and --radius. Bragi must NOT
+   re-import any of them: a second copy is a fork that survives the day the
+   package's own version changes. */
+@import '@poodle64/ui/styles.css';
+/* Tailwind's content scanner skips node_modules, so the package's own component
+   classes are never compiled without this. No build error, no lint hit — just
+   components that render unstyled. */
+@source '../node_modules/@poodle64/ui/dist';
+
+/* ==========================================================================
+   Colour Palette — Bragi Blue
+   ==========================================================================
+   Bragi is dark-only in practice: +layout.svelte forces setMode('dark') with
+   no user-facing light/dark toggle, so the near-black "premium music player"
+   surface ladder below is what actually renders. The :root (light) block is
+   kept for completeness but is not reachable through the UI today.
+
+   The @poodle64/design-tokens package owns :root light + .dark surface/status
+   defaults; these blocks override only the --ds-color-* vars where Bragi's
+   look differs (see DESIGN.md §Exception question).
+   ========================================================================== */
+
+:root {
+  --ds-color-primary: oklch(0.522 0.177 255.8);
+  --ds-color-primary-foreground: oklch(1 0 0);
+  --ds-color-ring: oklch(0.522 0.177 255.8);
+
+  --ds-color-background: oklch(0.985 0 0);
+  --ds-color-foreground: oklch(0.218 0 0);
+  --ds-color-surface-1: oklch(0.955 0 0);
+  --ds-color-surface-2: oklch(1 0 0);
+  --ds-color-surface-3: oklch(0.955 0 0);
+  --ds-color-muted-foreground: oklch(0.468 0 0);
+  --ds-color-border: oklch(0.858 0 0);
+  --ds-color-border-strong: oklch(0.858 0 0);
+  --ds-color-destructive: oklch(0.577 0.215 27.3);
+
+  /* Hover/subtle accent: a translucent Bragi-blue tint rather than the
+     package's neutral-surface default — the one deliberate deviation from
+     the shared alias mapping, via the documented override point. Resolves
+     through src/lib/styles/tokens.css's mode-aware --p11-accent-bg. */
+  --accent: var(--p11-accent-bg);
+
+  /* Chart and sidebar colours: neither package registers these (chrome hue
+     and chart palette are each app's own decision — @poodle64/ui ships no
+     chart or Sidebar component), so 20-sveltekit-frontend.md makes them
+     Bragi's own to define, even though nothing consumes them yet. */
+  --chart-1: oklch(0.522 0.177 255.8);
+  --chart-2: oklch(0.627 0.17 149.2);
+  --chart-3: oklch(0.666 0.157 58.3);
+  --chart-4: oklch(0.577 0.215 27.3);
+  --chart-5: oklch(0.541 0.247 293);
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.218 0 0);
+  --sidebar-primary: oklch(0.522 0.177 255.8);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--p11-accent-bg);
+  --sidebar-accent-foreground: oklch(0.218 0 0);
+  --sidebar-border: oklch(0.858 0 0);
+  --sidebar-ring: oklch(0.522 0.177 255.8);
+}
+
+.dark {
+  --ds-color-primary: oklch(0.647 0.152 257.2);
+  --ds-color-primary-foreground: oklch(1 0 0);
+  --ds-color-ring: oklch(0.647 0.152 257.2);
+
+  --ds-color-background: oklch(0.2 0 0);
+  --ds-color-foreground: oklch(0.955 0 0);
+  --ds-color-surface-1: oklch(0.285 0 0);
+  --ds-color-surface-2: oklch(0.235 0 0);
+  --ds-color-surface-3: oklch(0.285 0 0);
+  --ds-color-muted-foreground: oklch(0.757 0 0);
+  --ds-color-border: oklch(0.285 0 0);
+  --ds-color-border-strong: oklch(0.285 0 0);
+  --ds-color-destructive: oklch(0.663 0.224 28.3);
+
+  --accent: var(--p11-accent-bg);
+
+  --chart-1: oklch(0.647 0.152 257.2);
+  --chart-2: oklch(0.679 0.124 149.9);
+  --chart-3: oklch(0.782 0.171 67.2);
+  --chart-4: oklch(0.663 0.224 28.3);
+  --chart-5: oklch(0.709 0.159 293.5);
+
+  --sidebar: oklch(0.2 0 0);
+  --sidebar-foreground: oklch(0.955 0 0);
+  --sidebar-primary: oklch(0.647 0.152 257.2);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: var(--p11-accent-bg);
+  --sidebar-accent-foreground: oklch(0.955 0 0);
+  --sidebar-border: oklch(0.285 0 0);
+  --sidebar-ring: oklch(0.647 0.152 257.2);
+}
+
+/* Registers the app-owned chart/sidebar custom properties above as Tailwind
+   utilities (bg-sidebar, text-chart-1, ...). @poodle64/design-tokens and
+   @poodle64/ui already register everything else the shadcn surface needs. */
+@theme inline {
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    /* No outline utility here: `outline-ring/50` compiles to outline-color only,
+       and being layered it always loses to the unlayered :focus-visible rule in
+       src/lib/styles/tokens.css. It was dead CSS, not a fallback. */
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

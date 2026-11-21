@@ -1,0 +1,12 @@
+_commit: v2026.11.57
+_src_path: gh:radar-hooves/app-factory
+bundle_identifier: com.poodle64.bragi
+dark_first: false
+density: comfortable
+description: The desktop player for your own Jellyfin or OpenSubsonic music server, browsable even offline
+frontend_port: 1420
+linux_cargo_args: ''
+project_name: bragi
+project_title: Bragi
+skeleton: desktop
+team_name: Bragi

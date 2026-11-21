@@ -1,0 +1,9 @@
+{
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"noUncheckedIndexedAccess": true,
+		"sourceMap": true,
+		"strict": true
+	},
+	"include": ["src", "vite.config.ts", "vite.elements.config.ts", "playwright.config.ts", "tests"]
+}

@@ -1,0 +1,146 @@
+# Tag-triggered: build Bragi's installers, sign them with the updater's key, and
+# publish a GitHub Release carrying `latest.json`, so an installed Bragi offers
+# the next version to itself. The gate is the first job: the `change` run on the
+# tagged commit must have passed. A dispatch builds from any ref, skips the gate
+# and publishes nothing (a dry run).
+#
+# Bragi holds its own minisign keypair: the public key in tauri.conf.json
+# (`plugins.updater.pubkey`), the private key and its password as the repository
+# secrets TAURI_SIGNING_PRIVATE_KEY and TAURI_SIGNING_PRIVATE_KEY_PASSWORD
+# (app-factory docs/development/desktop-updater.md). macOS bundles are signed by
+# the runner's APPLE_SIGNING_IDENTITY (scripts/cargo-codesign.sh), and
+# scripts/tauri-release.sh verifies them before anything is uploaded.
+#
+# Trigger: set `version` in src-tauri/tauri.conf.json, Cargo.toml and
+# package.json, merge, then `git tag v<version> && git push origin v<version>`.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    if: startsWith(github.ref, 'refs/tags/v')
+    name: change passed on the tagged commit
+    runs-on: [self-hosted, household]
+    permissions:
+      actions: read
+    steps:
+      - name: Require a green change run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for _ in $(seq 1 120); do
+            c=$(gh run list --repo "${{ github.repository }}" --workflow change.yaml --branch main \
+              --commit "${{ github.sha }}" --json status,conclusion \
+              --jq '[.[] | select(.status == "completed")][0].conclusion // ""')
+            [ -n "$c" ] && break
+            sleep 30
+          done
+          [ "$c" = success ] || { echo "change run on ${{ github.sha }} is '${c:-missing}', not success"; exit 1; }
+
+  build:
+    needs: gate
+    if: always() && contains(fromJSON('["success","skipped"]'), needs.gate.result)
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: macos # Apple Silicon, on the runner holding the signing certificate
+            args: '--target aarch64-apple-darwin'
+          - host: macos # Intel, cross-compiled on Apple Silicon
+            args: '--target x86_64-apple-darwin'
+          - host: atlas # Linux x86_64 .deb and .rpm: linuxdeploy cannot bundle nix-store libraries into an AppImage
+            args: '--bundles deb rpm'
+    runs-on: [self-hosted, '${{ matrix.host }}']
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Require the updater's key and secrets
+        env:
+          PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          jq -e '.plugins.updater.pubkey | length > 0' src-tauri/tauri.conf.json >/dev/null \
+            || { echo "::error::plugins.updater.pubkey in src-tauri/tauri.conf.json is empty: mint Bragi's keypair first"; exit 1; }
+          [ -n "$PRIVATE_KEY" ] && [ -n "$PASSWORD" ] \
+            || { echo "::error::TAURI_SIGNING_PRIVATE_KEY and TAURI_SIGNING_PRIVATE_KEY_PASSWORD are not both set as repository secrets"; exit 1; }
+
+      - name: Require the tag to name the app's version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          version=$(jq -r .version src-tauri/tauri.conf.json)
+          [ "${GITHUB_REF_NAME#v}" = "$version" ] \
+            || { echo "::error::tag $GITHUB_REF_NAME but src-tauri/tauri.conf.json version is $version: latest.json carries the config's version, so installed copies would never see this release"; exit 1; }
+
+      - name: Install frontend dependencies
+        run: nix develop --command pnpm install --frozen-lockfile
+
+      - name: Build, sign and upload to the draft release
+        uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tauriScript: bash scripts/tauri-release.sh
+          tagName: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+          releaseName: 'Bragi ${{ github.ref_name }}'
+          releaseBody: 'Notes follow once every platform has built.'
+          releaseDraft: true
+          # Only a release build writes the updater's `.sig` and `latest.json`: a local `tauri build` has no private key.
+          args: ${{ matrix.args }} --config '{"bundle":{"createUpdaterArtifacts":true}}'
+
+  publish:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: [self-hosted, household]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Publish the draft with this version's notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # The legs upload latest.json in turn; one that lost a race would strand that
+          # platform's installed copies on this version without a word.
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern latest.json --output - \
+            | python3 -I -c 'import json, sys; p = json.load(sys.stdin)["platforms"]; sys.exit(not {"darwin-aarch64", "darwin-x86_64"} <= p.keys())' \
+            || { echo "::error::latest.json on $GITHUB_REF_NAME lacks a macOS platform"; exit 1; }
+
+          notes="$RUNNER_TEMP/bragi-release-notes.md"
+          # This tag's own CHANGELOG section: everything between its `## [x.y.z]`
+          # heading and the next `## [` heading.
+          awk -v ver="${GITHUB_REF_NAME#v}" '
+            $0 ~ "^## \\[" ver "\\]" { in_section = 1; next }
+            in_section && /^## \[/ { exit }
+            in_section { print }
+          ' CHANGELOG.md > "$notes"
+          grep -q '[^[:space:]]' "$notes" || { echo "::error::CHANGELOG.md has no section for $GITHUB_REF_NAME"; exit 1; }
+          # shellcheck disable=SC2016  # backticks here are literal markdown
+          {
+            printf '\n## Downloads\n\n'
+            printf -- '- **macOS**: `*_aarch64.dmg` for Apple Silicon, `*_x64.dmg` for Intel. Installed copies update themselves.\n'
+            printf -- '- **Linux**: `.deb` (Debian, Ubuntu) or `.rpm` (Fedora, RHEL). Requires `mpv`.\n'
+            printf -- '- **NixOS**: `nix profile install github:radar-hooves/bragi`\n'
+          } >> "$notes"
+
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --notes-file "$notes" --draft=false --latest

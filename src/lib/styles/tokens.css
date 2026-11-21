@@ -1,0 +1,249 @@
+/**
+ * Design system tokens for Bragi.
+ * P11 design language tokens. Colour tokens use --p11-* prefix to avoid
+ * collisions with Tailwind CSS 4 theme variables. Shadow and radius tokens
+ * that conflict with Tailwind also use --p11-* prefix.
+ */
+
+:root,
+.dark {
+  /* Colours (dark theme - premium music player) */
+  --p11-bg-primary: oklch(0.200 0.000 0);
+  --p11-bg-surface: oklch(0.235 0.000 0);
+  --p11-bg-elevated: oklch(0.285 0.000 0);
+  --p11-bg-hover: oklch(0.321 0.000 0);
+  --p11-accent: oklch(0.647 0.152 257.2);
+  --p11-accent-hover: oklch(0.709 0.128 256.6);
+  --p11-accent-subtle: rgba(77, 142, 233, 0.12);
+  --p11-text-primary: oklch(0.955 0.000 0);
+  --p11-text-secondary: oklch(0.757 0.000 0);
+  --p11-text-muted: oklch(0.556 0.000 0);
+  --p11-border: oklch(0.285 0.000 0);
+  --p11-border-subtle: oklch(0.252 0.000 0);
+  --p11-border-focus: oklch(0.647 0.152 257.2);
+  --p11-success: oklch(0.679 0.124 149.9);
+  --p11-success-bg: rgba(90, 173, 110, 0.1);
+  --p11-success-bg-strong: rgba(90, 173, 110, 0.2);
+  --p11-warning: oklch(0.782 0.171 67.2);
+  --p11-warning-bg: rgba(255, 159, 10, 0.1);
+  --p11-warning-bg-strong: rgba(255, 159, 10, 0.2);
+  --p11-error: oklch(0.663 0.224 28.3);
+  --p11-error-bg: rgba(255, 69, 58, 0.1);
+  --p11-error-bg-strong: rgba(255, 69, 58, 0.2);
+  --p11-error-hover: oklch(0.707 0.185 25.9);
+  --p11-accent-bg: rgba(77, 142, 233, 0.1);
+  --p11-selection: rgba(77, 142, 233, 0.18);
+  --p11-now-playing: rgba(77, 142, 233, 0.08);
+  --p11-scrollbar: rgba(255, 255, 255, 0.2);
+  --p11-scrollbar-hover: rgba(255, 255, 255, 0.3);
+  /* Channels for surface overlays and shades, so no component carries a raw
+     colour literal (stylelint blocks new ones). Consumed as
+     `rgb(var(--p11-overlay-rgb) / 0.06)`: the CHANNELS are the token, the alpha
+     stays at the call site where the emphasis decision belongs. Identical in
+     both themes today — exactly what the literals they replaced did — so a
+     theme-aware tint is now a one-line change rather than a sweep. */
+  --p11-overlay-rgb: 255 255 255;
+  --p11-shade-rgb: 0 0 0;
+
+  /* Genre tile ramp for a genre with too few covers to mosaic. Defined
+     here rather than in the component so no component carries a colour literal:
+     custom-property substitution is lazy, so --tile-hue is read from the tile
+     the token is used on, not from :root. */
+  --p11-tile-ramp-top: oklch(0.55 0.12 var(--tile-hue));
+  --p11-tile-ramp-bottom: oklch(0.34 0.09 var(--tile-hue));
+
+  /* Text sitting on artwork behind a dark scrim. Theme-independent: the scrim
+     is dark in both themes, so these are declared once on :root. */
+  --p11-text-on-media: rgba(255, 255, 255, 0.98);
+  --p11-text-on-media-muted: rgba(255, 255, 255, 0.75);
+
+  /* Shadows (dark theme) */
+  --p11-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --p11-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --p11-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6);
+  --p11-shadow-glow: 0 0 20px rgba(77, 142, 233, 0.15);
+  --p11-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --p11-shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+:root:not(.dark) {
+  /* Colours (light theme - proper light mode, not inverted) */
+  --p11-bg-primary: oklch(0.985 0.000 0);
+  --p11-bg-surface: oklch(1.000 0.000 0);
+  --p11-bg-elevated: oklch(0.955 0.000 0);
+  --p11-bg-hover: oklch(0.922 0.000 0);
+  --p11-accent: oklch(0.522 0.177 255.8);
+  --p11-accent-hover: oklch(0.446 0.148 255.2);
+  --p11-accent-subtle: rgba(0, 102, 204, 0.1);
+  --p11-text-primary: oklch(0.218 0.000 0);
+  --p11-text-secondary: oklch(0.468 0.000 0);
+  --p11-text-muted: oklch(0.633 0.000 0);
+  --p11-border: oklch(0.858 0.000 0);
+  --p11-border-subtle: oklch(0.931 0.000 0);
+  --p11-border-focus: oklch(0.522 0.177 255.8);
+  --p11-success: oklch(0.627 0.170 149.2);
+  --p11-success-bg: rgba(22, 163, 74, 0.1);
+  --p11-success-bg-strong: rgba(22, 163, 74, 0.15);
+  --p11-warning: oklch(0.666 0.157 58.3);
+  --p11-warning-bg: rgba(217, 119, 6, 0.1);
+  --p11-warning-bg-strong: rgba(217, 119, 6, 0.15);
+  --p11-error: oklch(0.577 0.215 27.3);
+  --p11-error-bg: rgba(220, 38, 38, 0.1);
+  --p11-error-bg-strong: rgba(220, 38, 38, 0.15);
+  --p11-error-hover: oklch(0.505 0.190 27.5);
+  --p11-accent-bg: rgba(0, 102, 204, 0.1);
+  --p11-selection: rgba(0, 102, 204, 0.2);
+  --p11-now-playing: rgba(0, 102, 204, 0.08);
+  --p11-scrollbar: rgba(0, 0, 0, 0.2);
+  --p11-scrollbar-hover: rgba(0, 0, 0, 0.3);
+
+  /* Shadows (light theme - softer, more natural) */
+  --p11-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --p11-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --p11-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --p11-shadow-glow: 0 0 20px rgba(0, 102, 204, 0.15);
+  --p11-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --p11-shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+:root {
+  /* Spacing (4px base) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+  /* Caption/micro-label tier: badge counts, column-header labels, sort
+     indicators. Collapses three drifted literals (8px/9px/10px) used for the
+     same "sort direction arrow" glyph across TrackList and GenresView into
+     one step. */
+  --font-size-2xs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  /* Display tier: large decorative glyphs (empty-artwork placeholder icon),
+     the same role as 2xl's "code displays" entry but for the one larger size
+     views actually use. */
+  --font-size-3xl: 40px;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --letter-spacing-tight: -0.01em;
+
+  /* Border radius */
+  --p11-radius-sm: 4px;
+  --p11-radius-md: 8px;
+  --p11-radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Transitions */
+  --transition-fast: 120ms ease-out;
+  --transition-normal: 200ms ease-out;
+  --transition-slow: 320ms ease-out;
+  --transition-spring: 300ms cubic-bezier(0.2, 0.9, 0.3, 1.0);
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 64px;
+  --player-bar-height: 80px;
+  /* The native title bar macOS draws with a unified toolbar, so AppKit
+     centres the traffic lights in the top bar (traffic_lights.rs). */
+  --header-height: 52px;
+
+  /* Grid tile size (user-adjustable via settings, range: 120px-280px) */
+  --grid-tile-size: 200px;
+  /* List artwork size (derived from grid tile size, range: 32px-64px) */
+  --list-artwork-size: 44px;
+
+  /* Z-index layers */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}
+
+/* Global resets */,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  /* A desktop window: the page never scrolls or bounces; panels scroll inside it. */
+  overscroll-behavior: none;
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--p11-text-primary);
+  background-color: var(--p11-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--p11-selection);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--p11-border-focus);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling - Firefox */
+* {
+  scrollbar-width: none;
+  /* Use dark native controls (dropdowns, etc.) in dark mode */
+  color-scheme: dark;
+}
+
+/* Light mode color-scheme: mode-watcher toggles the `.dark` class on <html>
+   (darkClassNames default), never a data-theme attribute — this must track
+   the same selector tokens.css already keys its colour tokens on above. */
+:root:not(.dark) * {
+  color-scheme: light;
+}
+
+/* Scrollbar styling - WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* Global select/dropdown styling for dark mode compatibility on Linux */
+select {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+select option {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}

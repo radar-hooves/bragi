@@ -1,0 +1,9 @@
+# Canonical-shape exceptions — Bragi
+# Grammar (canonical-app-shape.md §Exceptions): parity:<path>  YYYY-MM-DD  until:YYYY-MM-DD  <owner/repo#N>  # reason
+#
+# Skeleton-owned files Bragi keeps its own version of (v2026.11.57 stamp). Each is
+# a departure from the template; .template-parity.json hashes them as they stand.
+
+parity:stylelint.config.js  2026-11-16  until:2026-12-16  radar-hooves/bragi#1  # template's style rules flag 329 existing findings (278 autofixable); adopting them is a separate pass
+parity:src/app.html  2026-11-16  until:2026-12-16  radar-hooves/bragi#1  # template carries web-only /elements/placed.js, favicon.svg, manifest and no dark class; Bragi is dark-only with favicon.png alone
+parity:.github/actionlint.yaml  2026-11-21  until:2026-12-21  radar-hooves/bragi#1  # the Linux release leg's runner label, which the skeleton's own release.yaml names and its label list omits

@@ -1,0 +1,14 @@
+# cargo-audit config. Entries in `ignore` are dated with the rationale for
+# why they cannot be closed by a routine dependency bump (see security-audit.yaml).
+
+[advisories]
+ignore = [
+    # 2026-07-05: hickory-proto NSEC3 closest-encloser validation can loop
+    # unbounded on cross-zone responses (RUSTSEC-2026-0118, GHSA-3v94-mw7p-v465).
+    # No patched hickory-proto version exists -- the affected DnssecDnsHandle
+    # type was removed in the 0.26 release, not fixed. Unreachable in bragi:
+    # the resolver comes from reqwest's `hickory-dns` feature, which never
+    # enables the `dnssec-ring`/`dnssec-aws-lc-rs` features, so DNSSEC
+    # validation (the only code path that reaches this bug) is not compiled in.
+    "RUSTSEC-2026-0118",
+]

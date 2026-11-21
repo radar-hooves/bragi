@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "updater",
+  "description": "The main window checks Bragi's signed releases, installs one and relaunches",
+  "windows": ["main"],
+  "permissions": ["updater:default", "process:allow-restart"]
+}
