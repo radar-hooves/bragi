@@ -96,10 +96,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          # CI=true makes Tauri pass --skip-jenkins to create-dmg, which then skips the
-          # Finder AppleScript that styles the disk image: Finder cannot answer while the
-          # runner's desktop session is locked, and the build fails with AppleEvent -1712.
-          tauriScript: env CI=true bash scripts/tauri-release.sh
+          tauriScript: bash scripts/tauri-release.sh
           tagName: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
           releaseName: 'Bragi ${{ github.ref_name }}'
           releaseBody: 'Notes follow once every platform has built.'
