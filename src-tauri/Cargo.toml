@@ -29,16 +29,16 @@ tracing = "0.1"
 # The one telemetry call: stderr for the developer, allow-listed
 # OTLP/HTTP to your telemetry endpoint for what the audit target emits. Consumed from
 # the app-factory kit.
-telemetry = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.57" }
+telemetry = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.63" }
 # The Tauri 2 wiring for the crate above: init off the async runtime, the
 # Guard dropped on RunEvent::Exit, allow-listed command spans with no argument
 # capture, the Settings-pane commands, and the process sampler — one
 # `.plugin(...)` call in `lib.rs` in place of bragi's own former
 # `command_span.rs` and `commands/telemetry.rs`.
-tauri-plugin-telemetry = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.57" }
+tauri-plugin-telemetry = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.63" }
 # Centred macOS traffic lights (`traffic_lights::setup`) and `guard_tray`, which
 # keeps a missing appindicator library from killing the app at launch.
-desktop-shell = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.57" }
+desktop-shell = { git = "https://github.com/radar-hooves/app-factory", tag = "v2026.11.63" }
 # Names the client type `telemetry::http_client()` hands back, so the shared
 # traceparent-carrying client can be stored in bragi's own clients.
 reqwest-middleware = { version = "0.5", features = ["json", "query"] }
